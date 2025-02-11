@@ -7,85 +7,72 @@
 
 import UIKit
 
-class TodoTableViewController: UITableViewController {
-    
+#if DEBUG
+fileprivate let staticTodos: [TodoModel] = [TodoModel(id: 1, title: "Create TodoApp", description: "First Todo Description", completed: false), TodoModel(id: 2, title: "Post TodoApp", description: "Second Todo Description", completed: false), TodoModel(id: 3, title: "Create Readme for TodoApp", description: "Create Description", completed: false)]
+#endif
+
+protocol TodoTableViewControllerProtocol: AnyObject {
+    func showTodos(_ todos: [TodoModel])
+    func showError(_ message: String)
+}
+
+class TableViewController: UITableViewController {
+
+    var presenter: TodoTablePresenterProtocol?
+    let todoIdentifier = "TodoTableViewCell"
     var todos: [TodoModel] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        title = "TableView"
+        createTable()
+        
+        presenter?.viewDidLoad()
+        
     }
+    
+    private func createTable() {
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: todoIdentifier)
 
-    // MARK: - Table view data source
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
+        tableView.dataSource = self
+        tableView.delegate = self
+        
+        tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth/*, .flexibleBottomMargin*/]
+        self.todos = staticTodos
     }
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
+        return todos.count
     }
-
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-
-        // Configure the cell...
-
+        let cell = tableView.dequeueReusableCell(withIdentifier: todoIdentifier, for: indexPath)
+        
+        cell.textLabel?.text = todos[indexPath.row].title
         return cell
     }
-    */
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        presenter?.showDetail(for: todos[indexPath.row])
     }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+    
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70.0
     }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
+
+extension TableViewController: TodoTableViewControllerProtocol {
+    func showTodos(_ todos: [TodoModel]) {
+        self.todos = todos
+        tableView.reloadData()
+        print("showTodos", #function)
+    }
+    
+    func showError(_ message: String) {
+        print(message)
+    }
+    
+}
+

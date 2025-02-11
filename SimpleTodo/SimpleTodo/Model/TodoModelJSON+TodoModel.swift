@@ -30,3 +30,16 @@ extension TodoModel {
         )
     }
 }
+
+extension TodoModel {
+    static func toTodoModel(from entity: TodoEntity) -> Self {
+        return .init(
+            id: Int(entity.id),
+            title: entity.title ?? "",
+            description: entity.description,
+            completed: entity.completed,
+            createdAt: entity.createdAt ?? Date(),
+            userId: Int(entity.userId)
+        )
+    }
+}
