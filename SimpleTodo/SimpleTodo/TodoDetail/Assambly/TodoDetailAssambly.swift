@@ -8,18 +8,26 @@
 import UIKit
 
 class TodoDetailAssambly {
-    static func createModule() -> TodoDetailViewController {
+    static func createModule(for todo: TodoModel) -> TodoDetailViewController {
+        guard let vc = UIStoryboard(name: "MainTableView", bundle: nil).instantiateViewController(withIdentifier: "TodoDetailViewController") as? TodoDetailViewController else {
+            return TodoDetailViewController()
+        }
+
         let interactor = TodoDetailInteractor()
         let router = TodoDetailRouter()
         let presenter = TodoDetailPresenter()
-        let viewController = TodoDetailViewController()
         
         interactor.presenter = presenter
-        router.presenter = presenter
+        
+        router.view = vc
+        
         presenter.interactor = interactor
         presenter.router = router
-        presenter.view.viewController = viewController
+        presenter.view = vc
         
-        return viewController
+        vc.presenter = presenter
+        vc.todoItem = todo
+        
+        return vc
     }
 }
